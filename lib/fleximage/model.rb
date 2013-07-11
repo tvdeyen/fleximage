@@ -119,6 +119,9 @@ module Fleximage
         # Put uploads from different days into different subdirectories
         dsl_accessor :use_creation_date_based_directories, :default => true
         
+        # Use UTC to prevent file-system/DB conflicts
+        dsl_accessor :use_utc_for_date_based_directories, :default => true
+
         # The format that master images are stored in
         dsl_accessor :image_storage_format, :default => Proc.new { :png }
         
@@ -257,6 +260,9 @@ module Fleximage
         
         # specific creation date based directory suffix.
         creation = self[:created_at] || self[:created_on]
+        # use utc to prevent conflicts with different time zones
+        creation = creation.utc if self.class.use_utc_for_date_based_directories
+
         if self.class.use_creation_date_based_directories && creation 
           "#{directory}/#{creation.year}/#{creation.month}/#{creation.day}"
         else
